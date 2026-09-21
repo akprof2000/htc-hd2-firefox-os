@@ -103,14 +103,13 @@ make profile PRODUCTION=1 GAIA_DEVICE_TYPE=phone \
 
 Gaia 2.5 кладёт предустановленные сторонние упакованные приложения — **Заметки, Калькулятор, BuddyUp, Marketplace** (каталоги с UUID-именами) — только с `update.webapp` и `application.zip`, без `manifest.webapp`. В образах Mozilla приложения лежат в `/system/b2g/webapps`, и при первом запуске Gecko переносит их в `/data/local`, доставая манифест из пакета. Если класть оболочку сразу в `/data/local`, этот шаг не выполняется: в `update.webapp` нет стартовой страницы, и приложение открывает список файлов.
 
-Лечение — после каждой установки оболочки извлечь `manifest.webapp` из пакета в каталог приложения:
+Лечение — после каждой установки оболочки одна команда (телефон подключён по USB):
 
 ```
-adb pull "/data/local/webapps/<id>/application.zip" app.zip
-unzip -p app.zip manifest.webapp > manifest.webapp
-adb push manifest.webapp "/data/local/webapps/<id>/manifest.webapp"
-adb shell "sh /data/local/fixown.sh; stop b2g; start b2g"
+python tools/hd2app.py fix-manifests
 ```
+
+Она находит упакованные приложения без `manifest.webapp`, извлекает его из пакета, выставляет владельца и перезапускает систему.
 
 Приложения-ссылки (Twitter, Facebook, Bugzilla Lite) это не затрагивает — манифест у них есть.
 
@@ -122,28 +121,22 @@ Firefox Marketplace закрыт с 2018 года, но перед закрыт�
 https://archive.org/download/Firefox_Marketplace_2018_03_Capture/Firefox_Marketplace_2018_03_Capture.zip/Firefox_Marketplace_2018_03_Capture/449752-cut-the-rope/cut-the-rope-1.4.zip
 ```
 
-Так на телефон поставлен **Cut the Rope 1.4** (ZeptoLab). Рядом с пакетом в архиве лежит `info.json` — по нему стоит проверить издателя, а в `manifest.webapp` пакета — разрешения.
-
-Установка:
+Всё это делает одна команда:
 
 ```
-adb shell "stop b2g"
-adb pull /data/local/webapps/webapps.json
-python tools/add_webapp.py webapps.json <id> app.zip > webapps-new.json
-unzip -p app.zip manifest.webapp > manifest.webapp
-adb push app.zip /data/local/webapps/<id>/application.zip
-adb push manifest.webapp /data/local/webapps/<id>/manifest.webapp
-adb push webapps-new.json /data/local/webapps/webapps.json
-adb shell "sh /data/local/fixown.sh; start b2g"
+python tools/hd2app.py fetch cut-the-rope        # найти в описи, скачать, сверить размер
+python tools/hd2app.py install cut-the-rope-1.4.zip
 ```
 
-[`tools/add_webapp.py`](tools/add_webapp.py) добавляет запись в реестр `webapps.json` по образцу штатных приложений. Приложение ставится как обычное (`appStatus 1`); для `privileged`-приложений это не подходит.
+`fetch` показывает издателя (из `info.json` архива), тип приложения и запрашиваемые разрешения — посмотрите на них перед установкой. `install` останавливает систему, добавляет приложение в реестр `webapps.json` по образцу штатных, копирует пакет и манифест, выставляет владельца `system` и запускает систему; прежний реестр сохраняется в `/data/local/webapps.json.bak`. Приложения ставятся как обычные (`appStatus 1`) — `privileged` и `certified` без подписи Marketplace не встанут, и `install` откажет сразу.
+
+Так на телефон поставлен **Cut the Rope 1.4** (ZeptoLab).
 
 ## Инструменты
 
 - [`tools/fb2png.py`](tools/fb2png.py) — снимок экрана из `/dev/graphics/fb0`. `screencap` в Firefox OS на HD2 выдаёт чёрный кадр: он читает слои SurfaceFlinger, а Gecko рисует мимо них.
 - [`tools/fixown.sh`](tools/fixown.sh) — владелец `system` для каталогов приложений после установки.
-- [`tools/add_webapp.py`](tools/add_webapp.py) — запись приложения в реестр `webapps.json`.
+- [`tools/hd2app.py`](tools/hd2app.py) — приложения одной командой: `fetch` из архива Marketplace, `install` на телефон, `fix-manifests`. adb берётся из `PATH` или переменной `ADB`.
 
 ## Лицензии
 
