@@ -15,6 +15,7 @@
 | Звук, Wi-Fi | ✅ |
 | Кнопки питания, «домой», громкость | ✅ |
 | Русский интерфейс и клавиатура | ✅ |
+| Сторонние приложения (Заметки, Калькулятор, Cut the Rope) | ✅ |
 | Свободная память после загрузки | ~60 МБ |
 
 По дороге были собраны и проверены на телефоне 1.1.1, 1.2, 1.3, 1.4, 2.0, 2.1, 2.2 и 2.5.
@@ -98,10 +99,51 @@ make profile PRODUCTION=1 GAIA_DEVICE_TYPE=phone \
 
 На телефон кладутся `webapps` и `defaults/settings.json`. Язык из `settings.json` применяется только к чистой базе настроек — на уже настроенном телефоне его один раз переключают вручную: **Настройки → Язык → Русский**. Сбрасывать базу настроек ради этого не стоит: вместе с языком пропадает всё остальное.
 
+## После установки оболочки: сторонние приложения
+
+Gaia 2.5 кладёт предустановленные сторонние упакованные приложения — **Заметки, Калькулятор, BuddyUp, Marketplace** (каталоги с UUID-именами) — только с `update.webapp` и `application.zip`, без `manifest.webapp`. В образах Mozilla приложения лежат в `/system/b2g/webapps`, и при первом запуске Gecko переносит их в `/data/local`, доставая манифест из пакета. Если класть оболочку сразу в `/data/local`, этот шаг не выполняется: в `update.webapp` нет стартовой страницы, и приложение открывает список файлов.
+
+Лечение — после каждой установки оболочки извлечь `manifest.webapp` из пакета в каталог приложения:
+
+```
+adb pull "/data/local/webapps/<id>/application.zip" app.zip
+unzip -p app.zip manifest.webapp > manifest.webapp
+adb push manifest.webapp "/data/local/webapps/<id>/manifest.webapp"
+adb shell "sh /data/local/fixown.sh; stop b2g; start b2g"
+```
+
+Приложения-ссылки (Twitter, Facebook, Bugzilla Lite) это не затрагивает — манифест у них есть.
+
+## Свои приложения без Marketplace
+
+Firefox Marketplace закрыт с 2018 года, но перед закрытием его содержимое сохранили: [Internet Archive — Firefox Marketplace, март 2018](https://archive.org/details/Firefox_Marketplace_2018_03_Capture). Архив — 13 ГБ, но качать его целиком не нужно: по описи `Firefox_Marketplace_2018_03_Capture.txt` находится нужный пакет, и он скачивается отдельно по пути внутри архива, например:
+
+```
+https://archive.org/download/Firefox_Marketplace_2018_03_Capture/Firefox_Marketplace_2018_03_Capture.zip/Firefox_Marketplace_2018_03_Capture/449752-cut-the-rope/cut-the-rope-1.4.zip
+```
+
+Так на телефон поставлен **Cut the Rope 1.4** (ZeptoLab). Рядом с пакетом в архиве лежит `info.json` — по нему стоит проверить издателя, а в `manifest.webapp` пакета — разрешения.
+
+Установка:
+
+```
+adb shell "stop b2g"
+adb pull /data/local/webapps/webapps.json
+python tools/add_webapp.py webapps.json <id> app.zip > webapps-new.json
+unzip -p app.zip manifest.webapp > manifest.webapp
+adb push app.zip /data/local/webapps/<id>/application.zip
+adb push manifest.webapp /data/local/webapps/<id>/manifest.webapp
+adb push webapps-new.json /data/local/webapps/webapps.json
+adb shell "sh /data/local/fixown.sh; start b2g"
+```
+
+[`tools/add_webapp.py`](tools/add_webapp.py) добавляет запись в реестр `webapps.json` по образцу штатных приложений. Приложение ставится как обычное (`appStatus 1`); для `privileged`-приложений это не подходит.
+
 ## Инструменты
 
 - [`tools/fb2png.py`](tools/fb2png.py) — снимок экрана из `/dev/graphics/fb0`. `screencap` в Firefox OS на HD2 выдаёт чёрный кадр: он читает слои SurfaceFlinger, а Gecko рисует мимо них.
 - [`tools/fixown.sh`](tools/fixown.sh) — владелец `system` для каталогов приложений после установки.
+- [`tools/add_webapp.py`](tools/add_webapp.py) — запись приложения в реестр `webapps.json`.
 
 ## Лицензии
 
