@@ -1,0 +1,13 @@
+--- a/intl/icu/source/common/unicode/uobject.h
++++ b/intl/icu/source/common/unicode/uobject.h
+@@ -19,6 +19,10 @@
+ 
+ #include "unicode/utypes.h"
+ 
++// HD2 / Android 4.0 NDK: typeid() is used across ICU, but <typeinfo> is not
++// pulled in indirectly by this STL the way it is on desktop toolchains.
++#include <typeinfo>
++
+ /**
+  * \file
+  * \brief C++ API: Common ICU base class UObject.

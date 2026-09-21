@@ -1,0 +1,19 @@
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/objdir-gonk44
+mk_add_options MOZ_MAKE_FLAGS="-j1"
+export GONK_PRODUCT=leo
+ac_add_options --with-gonk="$HOME/gonk"
+ac_add_options --with-gonk-toolchain-prefix="$HOME/android-ndk-r8e/toolchains/arm-linux-androideabi-4.7/prebuilt/linux-x86_64/bin/arm-linux-androideabi-"
+ac_add_options --enable-application=b2g
+ac_add_options --target=arm-linux-androideabi
+ac_add_options --with-arch=armv7-a
+ac_add_options --with-fpu=vfpv3-d16
+ac_add_options --with-float-abi=softfp
+ac_add_options --disable-tests --disable-debug --enable-optimize
+ac_add_options --disable-crashreporter --disable-updater
+ac_add_options --enable-release
+export ac_cv_func_posix_memalign=no
+export ac_cv_func_memalign=no
+mk_add_options MOZ_PARALLEL_BUILD=1
+# GCC 4.7 подставляет свой stdio.h, которому нужен sys/cdefs.h из bionic —
+# на этапе проверки пути gonk ещё не добавлены, укажем их явно.
+export CPPFLAGS="-isystem $HOME/gonk/bionic/libc/include -isystem $HOME/gonk/bionic/libc/arch-arm/include -isystem $HOME/gonk/bionic/libc/kernel/common -isystem $HOME/gonk/bionic/libc/kernel/arch-arm -isystem $HOME/gonk/bionic/libm/include -isystem $HOME/gonk/bionic"

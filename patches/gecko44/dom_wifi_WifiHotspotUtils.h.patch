@@ -1,0 +1,12 @@
+--- a/dom/wifi/WifiHotspotUtils.h
++++ b/dom/wifi/WifiHotspotUtils.h
+@@ -12,6 +12,9 @@
+ #ifndef WifiHotspotUtils_h
+ #define WifiHotspotUtils_h
+ 
++#include <stdint.h>  // int32_t
++#include <stddef.h>  // size_t
++
+ // Forward declaration.
+ struct wpa_ctrl;
+ 

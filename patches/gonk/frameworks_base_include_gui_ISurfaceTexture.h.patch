@@ -1,0 +1,16 @@
+--- a/frameworks/base/include/gui/ISurfaceTexture.h
++++ b/frameworks/base/include/gui/ISurfaceTexture.h
+@@ -127,6 +127,13 @@
+     // This method will fail if the the SurfaceTexture is not currently
+     // connected to the specified client API.
+     virtual status_t disconnect(int api) = 0;
++
++    // HD2: CyanogenMod ICS for legacy Qualcomm (QCOM_HARDWARE) has this extra
++    // method right after disconnect() in the phone's libgui. Without it here
++    // the vtable slot is shifted and the camera HAL's call lands in
++    // queryLocalInterface (SIGSEGV on preview).
++    virtual status_t performQcomOperation(int operation, int arg1, int arg2,
++                                          int arg3) = 0;
+ };
+ 
+ // ----------------------------------------------------------------------------

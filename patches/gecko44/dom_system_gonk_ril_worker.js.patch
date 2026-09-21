@@ -1,0 +1,113 @@
+--- a/dom/system/gonk/ril_worker.js
++++ b/dom/system/gonk/ril_worker.js
+@@ -2477,6 +2477,10 @@
+     if (app) {
+       // fetchICCRecords will need to read aid, so read aid here.
+       this.aid = app.aid;
++      // HD2: HTC-RIL 2.2 reports app_type UNKNOWN (0) for a plain GSM SIM.
++      if (app.app_type === CARD_APPTYPE_UNKNOWN) {
++        app.app_type = CARD_APPTYPE_SIM;
++      }
+       this.appType = app.app_type;
+       this.iccInfo.iccType = GECKO_CARD_TYPE[this.appType];
+ 
+@@ -2537,6 +2541,30 @@
+       }
+ 
+       ICCRecordHelper.fetchICCRecords();
++
++      // HD2: HTC-RIL 2.2 registers only after the radio is switched on by
++      // command, the preferred network type is set and automatic operator
++      // selection is requested (as Android does). Once: switching the radio
++      // off resets the card, and it becomes ready again right here.
++      if (!this._hd2RadioCycled) {
++        this._hd2RadioCycled = true;
++        if (DEBUG) this.context.debug("HD2: card ready, cycling radio");
++        let Buf = this.context.Buf;
++        Buf.newParcel(REQUEST_RADIO_POWER, {enabled: false});
++        Buf.writeInt32(1);
++        Buf.writeInt32(0);
++        Buf.sendParcel();
++        Buf.newParcel(REQUEST_RADIO_POWER, {enabled: true});
++        Buf.writeInt32(1);
++        Buf.writeInt32(1);
++        Buf.sendParcel();
++        Buf.newParcel(REQUEST_SET_PREFERRED_NETWORK_TYPE, {hd2Internal: true});
++        Buf.writeInt32(1);
++        Buf.writeInt32(3);
++        Buf.sendParcel();
++        Buf.simpleRequest(REQUEST_SET_NETWORK_SELECTION_AUTOMATIC,
++                          {hd2Internal: true});
++      }
+     }
+ 
+     this.cardState = newCardState;
+@@ -2867,9 +2895,35 @@
+     return changed;
+   },
+ 
++  // HD2: after a registration denial HTC-RIL 2.2 does not search again by
++  // itself. Rate-limited: once per 15 s, at most 6 times in a row.
++  _hd2RetryCount: 0,
++  _hd2LastRetry: 0,
++  _hd2RetryRegistration: function() {
++    let now = Date.now();
++    if (this._hd2RetryCount >= 6 || now - this._hd2LastRetry < 15000) {
++      return;
++    }
++    this._hd2RetryCount++;
++    this._hd2LastRetry = now;
++    if (DEBUG) this.context.debug("HD2: registration denied, retry " + this._hd2RetryCount);
++    let Buf = this.context.Buf;
++    Buf.newParcel(REQUEST_SET_PREFERRED_NETWORK_TYPE, {hd2Internal: true});
++    Buf.writeInt32(1);
++    Buf.writeInt32(3);
++    Buf.sendParcel();
++    Buf.simpleRequest(REQUEST_SET_NETWORK_SELECTION_AUTOMATIC,
++              {hd2Internal: true});
++  },
++
+   _processVoiceRegistrationState: function(state) {
+     let rs = this.voiceRegistrationState;
+     let stateChanged = this._processCREG(rs, state);
++    if (rs.regState === NETWORK_CREG_STATE_DENIED) {
++      this._hd2RetryRegistration();
++    } else if (rs.connected) {
++      this._hd2RetryCount = 0;
++    }
+     if (stateChanged && rs.connected) {
+       this.getSmscAddress();
+     }
+@@ -4456,6 +4510,11 @@
+   if (!options.errorMsg) {
+     this._updateNetworkSelectionMode(GECKO_NETWORK_SELECTION_AUTOMATIC);
+   }
++  if (options.hd2Internal) {
++    if (DEBUG) this.context.debug("HD2: automatic network selection, error " +
++                                  options.errorMsg);
++    return;
++  }
+   this.sendChromeMessage(options);
+ };
+ RilObject.prototype[REQUEST_SET_NETWORK_SELECTION_MANUAL] = function REQUEST_SET_NETWORK_SELECTION_MANUAL(length, options) {
+@@ -4603,6 +4662,9 @@
+ RilObject.prototype[REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM] = null;
+ RilObject.prototype[REQUEST_EXPLICIT_CALL_TRANSFER] = null;
+ RilObject.prototype[REQUEST_SET_PREFERRED_NETWORK_TYPE] = function REQUEST_SET_PREFERRED_NETWORK_TYPE(length, options) {
++  if (options.hd2Internal) {
++    return;
++  }
+   this.sendChromeMessage(options);
+ };
+ RilObject.prototype[REQUEST_GET_PREFERRED_NETWORK_TYPE] = function REQUEST_GET_PREFERRED_NETWORK_TYPE(length, options) {
+@@ -5362,8 +5424,8 @@
+   this.getDataCallList();
+   // Always ensure that we are not in emergency callback mode when init.
+   this.exitEmergencyCbMode();
+-  // Reset radio in the case that b2g restart (or crash).
+-  this.setRadioEnabled({enabled: false});
++  // HD2: do not reset the radio here. Nothing turns it back on afterwards
++  // because this modem reports radio state changes unreliably.
+ };
+ RilObject.prototype[UNSOLICITED_VOICE_RADIO_TECH_CHANGED] = function UNSOLICITED_VOICE_RADIO_TECH_CHANGED(length) {
+   // This unsolicited response will be sent when the technology of a multi-tech

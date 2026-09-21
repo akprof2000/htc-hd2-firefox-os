@@ -1,0 +1,84 @@
+--- a/ndk/sources/cxx-stl/system/include/typeinfo
++++ b/ndk/sources/cxx-stl/system/include/typeinfo
+@@ -1,31 +1,68 @@
+ #ifndef _TYPEINFO_HEADER_GAURD
+ #define _TYPEINFO_HEADER_GAURD
+ 
++// HD2 / Android 4.0: the stock system-STL header only forward-declares
++// std::type_info and defines a global ::type_info, so GCC refuses typeid()
++// ("must #include <typeinfo> before using typeid"). Gecko 44 builds ICU with
++// RTTI. This declaration follows the Itanium C++ ABI layout, binary-compatible
++// with libsupc++ from the NDK gnu-libstdc++ (which provides the definitions).
++
+ extern "C++" {
+ 
+-namespace std {
+-    class type_info;
+-    class bad_cast;
+-    class bad_typeid;
+-};
++namespace __cxxabiv1 {
++    class __class_type_info;
++}
+ 
++namespace std {
+ 
+ class type_info {
+ public:
+-    type_info();
+     virtual ~type_info();
+ 
+-    char const * name() const;
++    const char* name() const {
++        return __name[0] == '*' ? __name + 1 : __name;
++    }
++
++    bool before(const type_info& __arg) const {
++        return (__name[0] == '*' && __arg.__name[0] == '*')
++            ? __name < __arg.__name
++            : __builtin_strcmp(__name, __arg.__name) < 0;
++    }
++
++    bool operator==(const type_info& __arg) const {
++        return (__name == __arg.__name) ||
++               (__name[0] != '*' && __builtin_strcmp(__name, __arg.__name) == 0);
++    }
++
++    bool operator!=(const type_info& __arg) const {
++        return !operator==(__arg);
++    }
++
++    virtual bool __is_pointer_p() const;
++    virtual bool __is_function_p() const;
++    virtual bool __do_catch(const type_info* __thr_type, void** __thr_obj,
++                            unsigned __outer) const;
++    virtual bool __do_upcast(const __cxxabiv1::__class_type_info* __target,
++                             void** __obj_ptr) const;
+ 
+-    bool operator==(type_info const & right) const;
+-    bool operator!=(type_info const & right) const;
+-    bool before(type_info const & right) const;
++protected:
++    const char* __name;
++
++    explicit type_info(const char* __n) : __name(__n) { }
+ 
+ private:
+-    type_info(type_info const & right);
+-    type_info & operator=(type_info const & right);
++    type_info& operator=(const type_info&);
++    type_info(const type_info&);
+ };
+ 
+-}  // C++
++class bad_cast;
++class bad_typeid;
++
++}  // namespace std
++
++// The stock header exposed type_info in the global namespace; keep that.
++using std::type_info;
++
++}  // extern "C++"
+ 
+ #endif
