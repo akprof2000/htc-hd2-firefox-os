@@ -14,6 +14,7 @@
 | Карта памяти | ✅ |
 | Звук, Wi-Fi | ✅ |
 | Кнопки питания, «домой», громкость | ✅ |
+| Русский интерфейс и клавиатура | ✅ |
 | Свободная память после загрузки | ~60 МБ |
 
 По дороге были собраны и проверены на телефоне 1.1.1, 1.2, 1.3, 1.4, 2.0, 2.1, 2.2 и 2.5.
@@ -73,6 +74,29 @@ scripts/build.sh       — сборка
 - **Gaia 1.2–2.2:** в `Makefile` проверка последнего символа строки через `${LINE\#${LINE%?}}` ломается в новом GNU make, и оболочка молча собирается пустой. Заменить на `grep -q "[*]$"`. В 2.5 переписано.
 - **Gaia 2.2+** качает вспомогательный движок с отключённого сервера Mozilla. Брать XULRunner с `archive.mozilla.org/pub/xulrunner/releases/` (последний — 41) и собирать с `USE_LOCAL_XULRUNNER_SDK=1`.
 - **С 1.3** отключать предзапуск процессов Nuwa: `pref('dom.ipc.processPrelaunch.enabled', false)` — иначе после загрузки остаётся ~15 МБ.
+
+## Русский язык
+
+Переводы Gaia 2.5 сохранились на сервере Mozilla. Архив `.tar.gz` сервер не отдаёт (403), а `.zip` — отдаёт:
+
+```
+mkdir -p ~/gaia-l10n && cd ~/gaia-l10n
+curl -sL -o ru.zip https://hg.mozilla.org/releases/gaia-l10n/v2_5/ru/archive/tip.zip
+mkdir tmp && unzip -q ru.zip -d tmp && mv tmp/* ru && rmdir tmp
+```
+
+Список языков — [`locales/languages-ru.json`](locales/languages-ru.json). Сборка Gaia с русским по умолчанию и русской раскладкой клавиатуры:
+
+```
+make profile PRODUCTION=1 GAIA_DEVICE_TYPE=phone \
+  USE_LOCAL_XULRUNNER_SDK=1 XULRUNNER_DIRECTORY=$HOME/xulrunner41/xulrunner-sdk \
+  LOCALES_FILE=$HOME/gaia-l10n/languages-ru.json LOCALE_BASEDIR=$HOME/gaia-l10n \
+  GAIA_DEFAULT_LOCALE=ru GAIA_KEYBOARD_LAYOUTS=ru,en
+```
+
+В 2.5 переводы упаковываются в `locales-obj/index.ru.json` внутри `application.zip` каждого приложения.
+
+На телефон кладутся `webapps` и `defaults/settings.json`. Язык из `settings.json` применяется только к чистой базе настроек — на уже настроенном телефоне его один раз переключают вручную: **Настройки → Язык → Русский**. Сбрасывать базу настроек ради этого не стоит: вместе с языком пропадает всё остальное.
 
 ## Инструменты
 
