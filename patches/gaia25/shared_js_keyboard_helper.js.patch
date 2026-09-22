@@ -20,3 +20,16 @@
          });
        }
      }, this);
+@@ -602,6 +606,12 @@
+       Object.keys(currentSettings.enabledLayouts)
+         .concat(Object.keys(currentSettings.defaultLayouts))
+         .forEach(function(manifestURL) {
++          // HD2: never drop the built-in keyboard. While it is being
++          // restarted (OOM kill, early boot) it is briefly missing from the
++          // list; deleting its maps lost the ru layout and the defaults.
++          if (manifestURL === defaultKeyboardManifestURL) {
++            return;
++          }
+           // if the manifestURL doesn't exist in the list of apps, delete it
+           // from the settings maps
+           if (!inputApps.some(function(inputApp) {
