@@ -1,0 +1,14 @@
+--- a/apps/system/js/debugging_icon.js
++++ b/apps/system/js/debugging_icon.js
+@@ -7,8 +7,10 @@
+   };
+   DebuggingIcon.prototype = Object.create(BaseIcon.prototype);
+   DebuggingIcon.prototype.name = 'DebuggingIcon';
++  // HD2: the bug icon is always on because USB debugging stays enabled
++  // for adb; hide it, debugging itself keeps working.
+   DebuggingIcon.prototype.shouldDisplay = function() {
+-    return this.manager.enabled;
++    return false;
+   };
+ 
+   DebuggingIcon.prototype.view = function view() {
