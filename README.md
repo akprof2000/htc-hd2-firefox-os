@@ -58,6 +58,7 @@
 | [`gonk/bionic_libc_include_malloc.h.patch`](patches/gonk/bionic_libc_include_malloc.h.patch) | `posix_memalign` есть в libc телефона, но не объявлен в заголовках Android 4.0 (с Gecko 30) |
 | [`gecko44/configure.patch`](patches/gecko44/configure.patch), [`js_src_configure.patch`](patches/gecko44/js_src_configure.patch) | В сгенерированном `configure` съедена скобка `[[:space:]]`; нынешний GNU sed отвергает — не определяется версия ICU |
 | [`gecko44/dom_wifi_WifiHotspotUtils.h.patch`](patches/gecko44/dom_wifi_WifiHotspotUtils.h.patch) | Нет `<stdint.h>`/`<stddef.h>` (с Gecko 32) |
+| [`gaia25/shared_js_keyboard_helper.js.patch`](patches/gaia25/shared_js_keyboard_helper.js.patch) | После того как сторож памяти убивает клавиатуру, Gaia на мгновение не видит её в списке, стирает её раскладки из настроек и включает заново только первую по умолчанию — `en`; русская пропадает навсегда. Теперь включаются все раскладки по умолчанию для языка (для `ru` — `ru` и `en`). Файл общий: попадает в `system`, `settings` и `ftu` |
 | `vold` (вне репозитория) | Карта памяти: один байт по смещению `0x7192` — `cmp r3, #3` → `cmp r3, #7` (проверка номера раздела) |
 
 ## Сборка

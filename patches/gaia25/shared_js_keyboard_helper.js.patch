@@ -1,0 +1,22 @@
+--- a/shared/js/keyboard_helper.js
++++ b/shared/js/keyboard_helper.js
+@@ -565,11 +565,15 @@
+       });
+       if (!enabled) {
+         missingTypes.push(type);
++        // HD2: enable all default layouts for the language, not just the
++        // first one. When the keyboard app is OOM-killed, getApps() briefly
++        // drops its layouts from the settings; re-enabling only layouts[0]
++        // left the user with English alone (for ru the defaults are ru + en).
+         this.getLayouts({ type: type, 'default': true }, function(layouts) {
+-          if (layouts[0]) {
+-            layouts[0].enabled = true;
+-            layoutsEnabled.push(layouts[0]);
+-          }
++          layouts.forEach(function(layout) {
++            layout.enabled = true;
++            layoutsEnabled.push(layout);
++          });
+         });
+       }
+     }, this);
