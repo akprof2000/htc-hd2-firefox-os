@@ -1,6 +1,27 @@
 --- a/shared/js/keyboard_helper.js
 +++ b/shared/js/keyboard_helper.js
-@@ -565,11 +565,15 @@
+@@ -478,6 +478,20 @@
+     var settings = window.navigator.mozSettings;
+     if (settings) {
+       kh_getSettings();
++
++      // HD2: on every start re-enable the layouts of the current language
++      // (ru + en for Russian). Restarts of b2g and OOM kills of the keyboard
++      // app kept dropping the ru layout; layouts the user added stay as is.
++      kh_withSettings(function() {
++        var req = settings.createLock().get("language.current");
++        req.onsuccess = function() {
++          var lang = req.result["language.current"];
++          if (lang) {
++            KeyboardHelper.changeDefaultLayouts(lang, false);
++          }
++        };
++      });
++
+       settings.addObserver(SETTINGS_KEYS.ENABLED, kh_getSettings);
+       settings.addObserver(SETTINGS_KEYS.DEFAULT, kh_getSettings);
+ 
+@@ -565,11 +579,15 @@
        });
        if (!enabled) {
          missingTypes.push(type);
@@ -20,7 +41,7 @@
          });
        }
      }, this);
-@@ -602,6 +606,12 @@
+@@ -602,6 +620,12 @@
        Object.keys(currentSettings.enabledLayouts)
          .concat(Object.keys(currentSettings.defaultLayouts))
          .forEach(function(manifestURL) {
