@@ -1,0 +1,53 @@
+{
+  "name": "Tilescreen",
+  "description": "An tiled homescreen for FirefoxOS",
+  "launch_path": "/index.html",
+  "type": "privileged",
+  "role": "homescreen",
+  "developer": {
+    "name": "leandro713",
+    "url": "https://github.com/novia713/tilescreen"
+  },
+  "permissions": {
+    "homescreen-webapps-manage":{
+        "description": "Required for manage icon apps in homescreen"
+     },
+    "geolocation": {
+        "description": "Required for showing your Location & Postal Code"},
+    "systemXHR": {
+        "description": "Required for location & weather data"
+        }
+  },
+  "locales": {
+    "en-US": {
+      "name": "Tilescreen",
+      "description": "An tiled homescreen for FirefoxOS"
+    },
+    "es-ES": {
+      "name": "Tilescreen",
+      "description": "Un escritorio tipo mosaico para FirefoxOS"
+    },
+    "es-MX": {
+      "name": "Tilescreen",
+      "description": "Un escritorio tipo mosaico para FirefoxOS"
+    },
+    "ca": {
+      "name": "Tilescreen",
+      "description": "Un escriptori tipus mosaic per a FirefoxOS"
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "128":   "/style/icons/tilescreen.png",
+    "60":  "/style/icons/tilescreen60.png",
+    "48":  "/style/icons/tilescreen48.png",
+    "32":  "/style/icons/tilescreen32.png",
+    "30":  "/style/icons/tilescreen30.png",
+    "16":  "/style/icons/tilescreen16.png"
+  },
+  "orientation": "portrait-primary",
+  "activities": {},
+  "messages": [],
+  "origin": "app://tilescreen.leandro.org",
+  "version": "1.6"
+}

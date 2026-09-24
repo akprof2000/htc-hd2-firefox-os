@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+  <meta name="theme-color" content="#333333">
+  <title>YouTube</title>
+  <!-- Стили Gaia 2.5 (shared/), Apache 2.0, Mozilla Foundation -->
+  <link rel="stylesheet" href="shared/elements/gaia-theme/gaia-theme.css">
+  <link rel="stylesheet" href="shared/elements/gaia-icons/gaia-icons.css">
+  <link rel="stylesheet" href="shared/style/headers.css">
+  <link rel="stylesheet" href="shared/style/input_areas.css">
+  <link rel="stylesheet" href="shared/style/lists.css">
+  <link rel="stylesheet" href="shared/elements/gaia_tabs/style.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="theme-media">
+  <!-- Список: шапка, поиск, вкладки -->
+  <section role="region" id="main">
+    <header>
+      <h1>YouTube</h1>
+    </header>
+    <form role="search" id="search-form" class="skin-dark">
+      <p>
+        <input id="q" type="search" placeholder="Поиск видео" autocomplete="off">
+      </p>
+    </form>
+    <gaia-tabs position="top" skin="dark">
+      <a href="#" id="tab-popular" class="selected">Популярное</a>
+      <a href="#" id="tab-trending">В тренде</a>
+    </gaia-tabs>
+    <article data-type="list" id="scroll">
+      <ul id="list"></ul>
+    </article>
+  </section>
+
+  <!-- Плеер: шапка с кнопкой «назад» -->
+  <section role="region" id="player" hidden>
+    <header>
+      <a href="#" id="back" class="back" aria-label="Назад"><span data-icon="left" aria-hidden="true"></span></a>
+      <h1 id="p-title">YouTube</h1>
+    </header>
+    <video id="video" controls preload="none"></video>
+    <div class="info">
+      <p id="v-title"></p>
+      <p><a href="#" id="v-author" class="author"></a></p>
+      <p id="v-status" class="sub"></p>
+    </div>
+    <section data-type="list" id="comments-box">
+      <header>Комментарии</header>
+      <ul id="comments"></ul>
+      <a href="#" id="more" class="more" hidden>Ещё комментарии</a>
+    </section>
+  </section>
+
+  <!-- Страница автора: аватар, подписчики, ролики канала -->
+  <section role="region" id="channel" hidden>
+    <header>
+      <a href="#" id="ch-back" class="back" aria-label="Назад"><span data-icon="left" aria-hidden="true"></span></a>
+      <h1 id="ch-title"></h1>
+    </header>
+    <article data-type="list" class="scroll" id="ch-scroll">
+      <div class="ch-info">
+        <img id="ch-avatar" alt="">
+        <p id="ch-name"></p>
+        <p id="ch-subs" class="sub"></p>
+      </div>
+      <header>Видео</header>
+      <ul id="ch-list"></ul>
+      <a href="#" id="ch-more" class="more" hidden>Ещё видео</a>
+    </article>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

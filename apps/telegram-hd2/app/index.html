@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+  <meta name="theme-color" content="#f4f4f4">
+  <title>Telegram</title>
+  <!-- Стили Gaia 2.5 (shared/), Apache 2.0, Mozilla Foundation -->
+  <link rel="stylesheet" href="shared/elements/gaia-theme/gaia-theme.css">
+  <link rel="stylesheet" href="shared/elements/gaia-icons/gaia-icons.css">
+  <link rel="stylesheet" href="shared/style/headers.css">
+  <link rel="stylesheet" href="shared/style/input_areas.css">
+  <link rel="stylesheet" href="shared/style/lists.css">
+  <link rel="stylesheet" href="shared/style/buttons.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="theme-communications">
+
+  <!-- Вход: номер, картинка с кодом, код из Telegram, пароль -->
+  <section role="region" id="login" hidden>
+    <header>
+      <h1>Вход в Telegram</h1>
+    </header>
+    <article class="scroll">
+      <div class="pane">
+        <p id="login-hint">Введите номер телефона в международном виде, например +79161234567.</p>
+
+        <form id="form-phone">
+          <p class="field"><input id="phone" type="tel" placeholder="+7…"></p>
+          <button type="submit" class="recommend">Далее</button>
+        </form>
+
+        <form id="form-captcha" hidden>
+          <p>Повторите символы с картинки:</p>
+          <p><img id="captcha-img" alt="картинка с кодом"></p>
+          <p class="field"><input id="captcha" type="text" placeholder="символы с картинки" autocomplete="off"></p>
+          <button type="submit" class="recommend">Далее</button>
+        </form>
+
+        <form id="form-code" hidden>
+          <p>Код из Telegram:</p>
+          <p class="field"><input id="code" type="number" placeholder="12345"></p>
+          <button type="submit" class="recommend">Войти</button>
+          <button type="button" id="resend">Выслать код ещё раз</button>
+        </form>
+
+        <form id="form-pass" hidden>
+          <p>Пароль двухэтапной проверки:</p>
+          <p class="field"><input id="pass" type="password" placeholder="пароль"></p>
+          <button type="submit" class="recommend">Войти</button>
+        </form>
+
+        <p id="login-error" class="error" hidden></p>
+        <p class="note">Сообщения идут через сервер MPGram (<span id="server-name"></span>).
+          Он держит связь с Telegram вместо телефона, поэтому доступ к переписке
+          технически есть и у него.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- Список чатов -->
+  <section role="region" id="chats" hidden>
+    <header>
+      <a href="#" id="menu-btn" class="back" aria-label="Меню"><span data-icon="menu" aria-hidden="true"></span></a>
+      <menu type="toolbar">
+        <a href="#" id="chats-refresh" aria-label="Обновить"><span data-icon="reload" aria-hidden="true"></span></a>
+      </menu>
+      <h1>Telegram</h1>
+    </header>
+    <article data-type="list" class="scroll" id="chats-scroll">
+      <ul id="chat-list"></ul>
+    </article>
+  </section>
+
+  <!-- Переписка -->
+  <section role="region" id="chat" hidden>
+    <header>
+      <a href="#" id="chat-back" class="back" aria-label="Назад"><span data-icon="left" aria-hidden="true"></span></a>
+      <h1 id="chat-title">Чат</h1>
+    </header>
+    <article class="scroll" id="msg-scroll">
+      <a href="#" id="msg-more" class="more" hidden>Предыдущие сообщения</a>
+      <ul id="msg-list"></ul>
+    </article>
+    <form id="form-send">
+      <button type="button" id="attach" aria-label="Вложение"><span data-icon="attachment" aria-hidden="true"></span></button>
+      <input id="msg-text" type="text" placeholder="Сообщение">
+      <button type="submit" aria-label="Отправить"><span data-icon="arrow-right" aria-hidden="true"></span></button>
+    </form>
+    <input id="file" type="file" hidden>
+  </section>
+
+  <!-- Боковое меню: аккаунт, настройки, выход -->
+  <div id="drawer" class="drawer" hidden>
+    <nav class="drawer-box">
+      <div class="account">
+        <img id="me-ava" alt="">
+        <p id="me-name">…</p>
+        <p id="me-phone" class="sub"></p>
+      </div>
+      <a href="#" id="go-settings"><span data-icon="settings" aria-hidden="true"></span>Настройки</a>
+      <a href="#" id="go-logout"><span data-icon="user" aria-hidden="true"></span>Выйти из аккаунта</a>
+    </nav>
+  </div>
+
+  <!-- Настройки -->
+  <section role="region" id="settings" hidden>
+    <header>
+      <a href="#" id="settings-back" class="back" aria-label="Назад"><span data-icon="left" aria-hidden="true"></span></a>
+      <h1>Настройки</h1>
+    </header>
+    <article class="scroll">
+      <div class="pane">
+        <p>Сервер MPGram:</p>
+        <p class="field"><input id="server" type="url" placeholder="https://mp.nnproject.cc"></p>
+        <button type="button" id="server-save" class="recommend">Сохранить</button>
+        <p class="note">Сервер держит связь с Telegram вместо телефона. Можно указать свой,
+          если он поднят (github.com/shinovon/mpgram-web). После смены сервера нужно войти заново.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- Выбор вложения и стикеров -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-box">
+      <button type="button" id="pick-file">Фото или файл</button>
+      <button type="button" id="pick-sticker">Стикер</button>
+      <button type="button" id="sheet-cancel">Отмена</button>
+    </div>
+  </div>
+
+  <section role="region" id="stickers" hidden>
+    <header>
+      <a href="#" id="stickers-back" class="back" aria-label="Назад"><span data-icon="left" aria-hidden="true"></span></a>
+      <h1>Стикеры</h1>
+    </header>
+    <article class="scroll" id="stickers-scroll">
+      <div id="sticker-sets"></div>
+    </article>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

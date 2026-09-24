@@ -1,0 +1,28 @@
+{
+  "name": "Telegram HD2",
+  "description": "Telegram для HTC HD2 через сервер MPGram, интерфейс в стиле Firefox OS",
+  "launch_path": "/index.html",
+  "type": "privileged",
+  "developer": {
+    "name": "HD2",
+    "url": "https://github.com/akprof2000/htc-hd2-firefox-os"
+  },
+  "permissions": {
+    "systemXHR": {
+      "description": "Запросы к серверу MPGram"
+    },
+    "desktop-notification": {
+      "description": "Уведомления о новых сообщениях"
+    }
+  },
+  "icons": {
+    "60": "/icon60.png",
+    "128": "/icon128.png"
+  },
+  "orientation": ["portrait-primary", "landscape-primary", "landscape-secondary"],
+  "default_locale": "ru",
+  "locales": {
+    "ru": { "name": "Telegram HD2", "description": "Telegram через сервер MPGram" }
+  },
+  "version": "0.1"
+}

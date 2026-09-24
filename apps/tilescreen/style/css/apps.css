@@ -1,0 +1,266 @@
+    /* == set box-sizing to border-box == */
+
+    *, *:before, *:after { box-sizing: inherit;}
+    html { box-sizing: border-box;}
+
+html, body { height: 100%; overflow-x: hidden;}
+
+body {margin: 0;}
+
+#apps {
+    overflow-y:scroll;
+    overflow-x: hidden;
+    color: #fff;
+    color: rgba(255,255,255,0.85);
+    background-color: #000;
+}
+
+#pill{
+    background: #2C393B;
+}
+
+
+#city{
+    font-size:2rem;
+    color: white;
+    font-size:40px;
+    margin: 5%;
+    vertical-align: middle;
+    text-shadow: 2px 2px 2px #B2F2FF;
+    float:left
+}
+
+#weather_desc{
+    float:right;
+    color: white;
+}
+
+#time {
+    text-align:center;
+    color:white;
+    margin-top: 30%;
+}
+
+
+.appname {
+    color:whitesmoke;
+    font-size:14px;
+    position: relative;
+    overflow:hidden;
+    z-index: 1;
+}
+
+.tile {
+    display: inline-block;
+    position:relative;
+    padding: 2%;
+    margin: 4px 4px;
+    text-align: right;
+    float:left;
+    border-radius:2px;
+    overflow: hidden;
+    z-index:1;
+}
+
+    /* this will change once we develop the new grid system... so it's temporal */
+    .t_4_1 .tile{ margin-left:0px; margin-right:8px; }
+
+.tile_ic{
+    z-index: -1;
+    display:block;
+    position:absolute; top:0; left:0;
+    width:100%;
+    height:100%;
+    border-radius: 2px;
+    background-size: 60%!important;
+    background-position: center center!important;
+    cursor:pointer;
+}
+    .tile_ic:after {
+        content: "";
+        background: rgba(255,255,255,0.5);
+        display: block;
+        position: absolute; top:50%; left:50%;
+        width: 1px; height: 1px;
+        opacity: 0;
+        transition: all 0.5s;
+    }
+
+    .tile_ic:active:after {
+        width: 100%; height: 100%;
+        top: 0; left:0;
+        opacity: 1;
+        transition: 0s;
+        border-radius: 3px;
+    }
+    
+.tile_bg{
+    z-index: -2;
+    display:block;
+    position:absolute; top:0; left:0;
+    width:100%;
+    height:100%;
+    border-radius: 2px;
+}
+    #setup-tile .tile_bg{
+        background: linear-gradient(0deg, #c00 0%, #f00 50%, orange 100%);
+    }
+    #weather-info {
+        line-height: 1.5rem;
+        position:absolute; bottom:0;
+        padding-left:27px;
+        text-align:left;
+    }
+        #weather-info img{
+            display:inline-block;
+            position: absolute; top:0; left:0;
+            max-height:1.5rem;
+        }
+        #weather-info em{
+            opacity: 0.6;
+        }
+    #setup-tile .options{
+        padding:0px;
+        height:100%;
+        background-color:transparent;
+        cursor:pointer;
+    }
+    #settings_bt{
+        display:block; width:3rem; height:3rem;
+        position:absolute; top:0; left:2px;
+        opacity:0.5;
+        color:#fff;
+        cursor:pointer;
+    }
+    #settings_bt::before{
+        font-size: 3rem!important;
+    }
+    #dock .tile_bg{
+        background: linear-gradient(0deg, #444 0%, #000 50%, #666 100%)
+    }
+
+.small {
+    display: inline-block;
+    padding: 3%;
+}
+
+.bt{
+    background-color: rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius:1.2em;
+    text-align:center;
+    margin-bottom: 0.5rem;
+    padding: 0.2rem 0;
+    cursor: pointer;
+}
+
+    /* ==== STYLES WHEN ACTIVATED TRANSPARENCY MODE ==== */
+
+    #apps.transparent{
+        background-color: rgba(0,0,0,0.1);
+    }
+    #apps.transparent .tile_bg{
+        opacity: 0.5;
+    }
+
+
+
+
+.name {
+    color: white;
+    margin: 5%;
+    vertical-align: middle;
+    text-shadow: 1px 1px 1px #000;
+    text-align: right;
+}
+
+#scrollbar {
+    margin-top:10%;
+    float: right;
+}
+
+#menu_settings {
+    display:none;
+}
+
+#settings {
+    float:right;
+    font-size:29px;
+    margin-right:-10%;
+    margin-top:3%;
+}
+
+#worded .weekday{
+    font-size: 1rem;
+    font-weight: normal;
+}
+#worded .monthday{
+    font-size: 5rem;
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* === popup window for render options, like the list of apps to select a new one for a tile === */
+    #popup{
+        position: absolute; top:0; left:0;
+        z-index: 100;
+        width: 100%; height: 100%;
+        overflow-y: scroll;
+        background-color: #444; color: #eee;
+        padding:1rem; padding-bottom:3rem;
+    }
+        #popup h2{
+            font-weight: normal;
+            text-align:left;
+            border-bottom:1px #666 solid;
+            padding:0; margin:0;
+            padding-bottom:0.5rem;
+            margin-bottom:0.5rem;
+            position: relative;
+        }
+        #popup .close_bt{
+            position: absolute; right:5px;
+            min-width: 3rem; /* for great enought the 'tap' surface of the button */
+            text-align:right;
+            z-index:101;
+            background-color:transparent;
+            cursor:pointer;
+        }
+        #popup ul{
+            list-style-type: none;
+            padding:0;
+            margin-bottom: 1rem;
+        }
+        #popup li{
+            display:block;
+            position: relative;
+            margin:3px; padding-left: 40px;
+            line-height: 1.5em; height:1.5em;
+            background-color: rgba(255,255,255,0.7); color: #111;
+            border-radius: 1.5em;
+            cursor: pointer;
+        }
+            #popup li:hover{
+                background-color: rgba(255,255,255,0.9);
+            }
+            #popup li img{
+                display:inline-block;
+                position:absolute; top:3px;left: 10px;
+                max-height:1.1em;
+            }
+
+/* HD2: app name on big tiles */
+.tile_label {
+    position: absolute;
+    left: 6px; right: 6px; bottom: 4px;
+    color: white;
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    pointer-events: none;
+    z-index: 2;
+}
+.small .tile_label { display: none; }

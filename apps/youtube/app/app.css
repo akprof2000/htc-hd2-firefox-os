@@ -1,0 +1,325 @@
+/* Дополнения к стилям Gaia 2.5 (shared/): только то, чего там нет.
+ * Цвета берутся из переменных темы theme-media (gaia-theme.css). */
+
+html {
+  font-size: 10px;
+}
+
+/* выделение — красный YouTube вместо голубого theme-media;
+   цвет из палитры Gaia (--color-destructive) */
+.theme-media {
+  --highlight-color: #e2443a;
+  --header-button-color: #e2443a;
+}
+
+[data-type="list"] li > a:active:after {
+  background-color: rgba(226, 68, 58, 0.3);
+}
+
+gaia-tabs > :active {
+  background-color: rgba(226, 68, 58, 0.3);
+}
+
+/* в gaia_tabs и input_areas синий вписан напрямую, не через тему */
+gaia-tabs > .selected:after,
+gaia-tabs[underline="child"] > .selected > :after {
+  border-bottom-color: var(--highlight-color);
+}
+
+input:focus,
+textarea:focus,
+.skin-dark input:focus,
+.skin-dark textarea:focus {
+  box-shadow: inset 0 -0.1rem 0 var(--highlight-color);
+  border-bottom-color: var(--highlight-color);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--background);
+  color: var(--text-color);
+  font-family: "Fira Sans", sans-serif;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------ экраны */
+
+section[role="region"] {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+/* headers.css по умолчанию рыжий (старый скин) — берём цвета темы */
+section[role="region"] > header:first-child {
+  flex: none;
+  background: var(--header-background);
+  color: var(--text-color);
+}
+
+section[role="region"] > header:first-child h1 {
+  color: var(--text-color);
+}
+
+/* кнопка «назад» — значок gaia-icons, как в gaia-header */
+section[role="region"] > header:first-child .back {
+  float: left;
+  width: 5rem;
+  min-width: 5rem;
+  padding: 0;
+  color: var(--header-icon-color);
+}
+
+.back [data-icon]:before {
+  font-size: 3rem;
+  line-height: 5rem;
+}
+
+.back:active {
+  opacity: 0.2;
+}
+
+/* заголовок по центру с учётом кнопки слева */
+#player header h1,
+#channel header h1 {
+  margin-right: 5rem;
+}
+
+/* ------------------------------------------------------------ поиск */
+
+form[role="search"] {
+  flex: none;
+  margin: 0;
+}
+
+form[role="search"] p {
+  margin: 0;
+}
+
+form[role="search"] p input {
+  width: 100%;
+  font-size: 1.7rem;
+  color: var(--text-color);
+}
+
+/* ------------------------------------------------------------ вкладки */
+
+/* в Gaia вкладки сверху прижаты абсолютно — здесь они идут в потоке */
+gaia-tabs[position="top"] {
+  position: relative;
+  flex: none;
+  border-bottom-color: var(--border-color);
+}
+
+gaia-tabs[skin="dark"] > * {
+  background-color: var(--background-minus);
+}
+
+gaia-tabs > .selected,
+gaia-tabs[skin="dark"] > .selected {
+  color: var(--highlight-color);
+}
+
+/* ------------------------------------------------------------ список */
+
+#scroll,
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* lists.css рассчитан на светлые приложения — цвета из темы */
+[data-type="list"] li {
+  height: auto;
+  min-height: 6rem;
+  border-bottom-color: var(--border-color);
+  color: var(--text-color);
+}
+
+[data-type="list"] li > a {
+  height: auto;
+  min-height: 6rem;
+  padding: 0.8rem 0;
+  overflow: hidden;
+  color: var(--text-color);
+}
+
+/* обложка — прямоугольник 16:9 с прямыми углами; lists.css делает
+   картинки круглыми (под аватарки) — скругление снимаем */
+[data-type="list"] aside.thumb {
+  width: 11.2rem;
+  height: 6.3rem;
+  margin-right: 1rem;
+  background: var(--background-minus);
+}
+
+[data-type="list"] aside.thumb img {
+  display: block;
+  width: 11.2rem;
+  height: 6.3rem;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+[data-type="list"] li p {
+  white-space: normal;
+  overflow: hidden;
+  color: var(--color-zeta);
+}
+
+[data-type="list"] li p:first-of-type {
+  max-height: 4.4rem;
+  font-size: 1.6rem;
+  line-height: 2.2rem;
+  color: var(--text-color);
+}
+
+[data-type="list"] li.msg {
+  border: 0;
+  padding: 3rem 0;
+  text-align: center;
+  font-size: 1.6rem;
+  color: var(--color-zeta);
+}
+
+.error {
+  color: var(--color-destructive) !important;
+}
+
+/* ------------------------------------------------------------ плеер */
+
+#player {
+  overflow-y: auto;
+  display: block;
+}
+
+#video {
+  display: block;
+  width: 100%;
+  min-height: 18rem;
+  background: #000;
+}
+
+.info {
+  padding: 1rem 1.5rem;
+}
+
+.info p {
+  margin: 0 0 0.6rem;
+}
+
+#v-title {
+  font-size: 1.8rem;
+  line-height: 2.2rem;
+}
+
+.sub {
+  font-size: 1.5rem;
+  color: var(--color-zeta);
+}
+
+/* ------------------------------------------------------------ комментарии */
+
+#comments-box {
+  padding-bottom: 2rem;
+}
+
+/* заголовок-разделитель списка Gaia — красный вместо оранжевого */
+#comments-box header {
+  color: var(--highlight-color);
+  border-bottom: 0.1rem solid var(--highlight-color);
+}
+
+#comments li {
+  height: auto;
+  min-height: 0;
+  padding: 1rem 0;
+}
+
+#comments li p {
+  white-space: normal;
+  line-height: 2rem;
+}
+
+#comments li p.who {
+  font-size: 1.4rem;
+  color: var(--color-zeta);
+}
+
+#comments li p.text {
+  font-size: 1.6rem;
+  color: var(--text-color);
+  word-wrap: break-word;
+}
+
+#comments li.msg {
+  padding: 2rem 0;
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--color-zeta);
+}
+
+.more {
+  display: block;
+  height: 4rem;
+  margin: 1rem 0 0;
+  line-height: 4rem;
+  text-align: center;
+  font-size: 1.6rem;
+  border-radius: 0.2rem;
+  background: var(--background-plus);
+  color: var(--text-color);
+}
+
+.more:active {
+  background: var(--highlight-color);
+}
+
+/* ------------------------------------------------------------ автор */
+
+.author {
+  font-size: 1.5rem;
+  color: var(--highlight-color);
+  text-decoration: none;
+}
+
+.author:active {
+  opacity: 0.5;
+}
+
+.ch-info {
+  padding: 2rem 0 1.5rem;
+  text-align: center;
+}
+
+#ch-avatar {
+  display: block;
+  width: 8rem;
+  height: 8rem;
+  margin: 0 auto 1rem;
+  border-radius: 4rem;          /* аватар круглый, как у контактов Gaia */
+  background: var(--background-minus);
+}
+
+#ch-name {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-color);
+}
+
+#ch-subs {
+  margin: 0.4rem 0 0;
+}
+
+/* заголовки-разделители списков — цвет выделения, а не оранжевый Gaia */
+#channel [data-type="list"] > header {
+  color: var(--highlight-color);
+  border-bottom: 0.1rem solid var(--highlight-color);
+}

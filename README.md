@@ -147,11 +147,45 @@ python tools/hd2app.py install cut-the-rope-1.4.zip
 
 Так на телефон поставлен **Cut the Rope 1.4** (ZeptoLab).
 
+`privileged`-приложения (им нужны `systemXHR`, `browser` и т. п.) ставятся как встроенные: запись в `webapps.json` с `appStatus 2` плюс строки разрешений в **`/data/local/permissions.sqlite`** (не в профиле!) вида `app://<id>^appId=<localId>`. Это делает [`tools/install_app.py`](tools/install_app.py):
+
+```
+python tools/build_app.py apps/youtube/app youtube.zip
+python tools/install_app.py phone youtube.zip youtube.hd2.app YouTube systemXHR indexedDB
+```
+
+Вместо `phone` можно `sim` — тогда приложение встанет в симулятор.
+
+## Наши приложения
+
+Все — на ES5 (движок Gecko 44), со стилями Gaia 2.5 из `shared/` (Apache-2.0).
+
+- [`apps/youtube`](apps/youtube/app) — **YouTube**. Серверы берутся из списка проекта notPipe (`http://144.31.189.129/notPipe.json`). Список, поиск, каналы и комментарии — через Invidious (запасной — Piped), видео 360p — yt2009 → Piped → Invidious, при сбое источник меняется сам. Тема `theme-media`, акцент — красный. Разрешения: `systemXHR`.
+- [`apps/telegram-hd2`](apps/telegram-hd2/app) — **Telegram HD2**, клиент к серверу [MPGram](https://github.com/shinovon/mpgram-web) (`api.php`, описание — `API.md` там же). Телефон не занимается MTProto: связь с Telegram держит сервер (по умолчанию `mp.nnproject.cc`, в настройках можно указать свой). Вход с картинкой-кодом (её вводит человек), код и пароль 2FA; чаты, переписка, фото, файлы, голосовые, стикеры, меню с выходом. **Переписка идёт через сервер MPGram — у его владельца технически есть доступ к сессии.** Разрешения: `systemXHR`, `desktop-notification`.
+- [`apps/tilescreen`](apps/tilescreen) — лаунчер **Tilescreen 1.6** (leandro713, MIT) с правками: русские подписи плиток и дни недели, прозрачная верхняя панель (`theme-color`), плитки различаются по `manifestURL` (иначе «Telegram» и «Telegram HD2» открывали одно и то же). Разрешения: `homescreen-webapps-manage`, `webapps-manage`, `indexedDB`, `geolocation`, `systemXHR`.
+
+Webogram (web.telegram.org/?legacy=1) на Gecko 44 тоже работает, но тяжёл для HD2 (2,6 МБ кода); tweb не пойдёт совсем — нужны WebAssembly и BigInt.
+
+## Корневые сертификаты
+
+Встроенные корни NSS 2015 года: без ISRG Root X1 не открываются сайты на Let's Encrypt (в том числе MPGram). [`tools/certs/certs.sh`](tools/certs/certs.sh) добавляет корни Mozilla (`curl.se/ca/cacert.pem`) и Минцифры в базу профиля. На телефоне база — `cert9.db` (`certutil -d sql:`), в профиле симулятора — старый `cert8.db` (`certutil -d dbm:`). Правка — при остановленном b2g.
+
+## Симулятор
+
+[`simulator/`](simulator) — запуск Mulet (Firefox OS 2.6, `fxos-simulator-2.6.20151123030230-win32.xpi` с archive.mozilla.org) с Gaia 2.5 из этой сборки, во весь экран второго монитора. Грабли: ключ `-chrome chrome://b2g/content/shell.html` обязателен; в `-screen ШxВ@K` после `@` — масштаб, а не DPI; Firefox умножает на масштаб Windows монитора; размер окна после старта менять нельзя; чтобы не писать в `%APPDATA%`, нужны `XRE_PROFILE_PATH`, `-UAppData` и уборка служебных папок после выхода. `fit-simulator` растягивает окно обратно после сна монитора.
+
+## Готовые сборки
+
+Выпуск [v2.5-hd2](https://github.com/akprof2000/htc-hd2-firefox-os/releases/tag/v2.5-hd2): движок b2g 44, Gaia 2.5 (русская и исходная), пакеты `system`/`settings`/`ftu` со всеми правками, Tilescreen, YouTube и Telegram HD2 — чтобы восстановить телефон без пересборки.
+
 ## Инструменты
 
 - [`tools/fb2png.py`](tools/fb2png.py) — снимок экрана из `/dev/graphics/fb0`. `screencap` в Firefox OS на HD2 выдаёт чёрный кадр: он читает слои SurfaceFlinger, а Gecko рисует мимо них.
 - [`tools/fixown.sh`](tools/fixown.sh) — владелец `system` для каталогов приложений после установки.
 - [`tools/hd2app.py`](tools/hd2app.py) — приложения одной командой: `fetch` из архива Marketplace, `install` на телефон, `fix-manifests`. adb берётся из `PATH` или переменной `ADB`.
+- [`tools/build_app.py`](tools/build_app.py) — пакет приложения (zip) из папки `app/`.
+- [`tools/install_app.py`](tools/install_app.py) — установка `privileged`-приложения на телефон или в симулятор (реестр + разрешения).
+- [`tools/certs/certs.sh`](tools/certs/certs.sh) — корневые сертификаты Mozilla и Минцифры в базу NSS.
 
 ## Лицензии
 

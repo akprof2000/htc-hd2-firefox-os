@@ -1,0 +1,434 @@
+'use strict'
+
+/**
+ *          .·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.
+ *          .·' H O M E S C R E E N S F O R A L L'·.  by leandro713
+ *          .·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.·.
+ *
+ * Tilescreen
+ * (c)  [ leandro@leandro.org, sergio.cero@gmail.com ]
+ * GPL v3 license
+ *
+ * @author      leandro713 <leandro@leandro.org>
+ * @copyright   leandro713 - 2016
+ * @link        https://github.com/novia713/tilescreen
+ * @license     http://www.gnu.org/licenses/gpl-3.0.en.html
+ * @version     1.6
+ * @date        20160203
+ *
+ * @see         https://github.com/mozilla-b2g/gaia/tree/88c8d6b7c6ab65505c4a221b61c91804bbabf891/apps/homescreen
+ * @thanks      to @CodingFree for his tireless support and benevolent friendship
+ * @todo
+ *      - show wifi network name and telephony provider name
+ *      - show missed calls
+ *
+ */
+
+
+requirejs.config({
+    appDir: ".",
+    baseUrl: "js",
+    paths: {
+        'ramdajs'   : ['external/ramda.min'],
+        'utils'     : ['internal/utils'],
+        'config'    : ['internal/config'],
+        'fxos_icons': "../bower_components/fxos-icons/fxos-icons"
+
+
+    },
+    shim: {
+        'ramdajs': {  exports: 'R' },
+        'config' : {  exports: 'C' },
+        'utils'  : {  exports: 'U' }
+    }
+});
+
+require(['ramdajs', 'utils', 'config', 'fxos_icons'], ( R, U, C ) => {
+
+    var i = 0;
+
+    /**
+    Prints set up message
+    @private
+    @method print_msg
+    @return {String} a div indicating to select this homescreen as default
+    */
+     var print_msg = () => {
+        var txt_msg  = "<div style='background-color:orange;color:white'><h3>Please, set this homescreen your default homescreen in <i>Settings / Homescreens / Change Homescreens</i>. This homescreen won't work if you don't do so</h3></div>";
+            txt_msg += "<div style='background-color:orange;color:black'><h3>Ve a <i>Configuración / Homescreens</i> y haz este homescreen tu homescreen por defecto. Si no lo haces, este homescreen no funciona!</h3></div>";
+            C.parent.innerHTML = txt_msg;
+     };
+
+
+        /**
+        Builds the setup-tile
+        @private
+        @method build_setup_tile
+        @return {String} a div with location and date info
+        */
+     var build_setup_tile = () => {
+
+        var oldtile = document.getElementById("setup-tile");
+        if ( oldtile )
+            C.parent.removeChild( oldtile );
+
+        var tile       = document.createElement('div');
+        tile.id        = 'setup-tile';
+        tile.className = 'tile';
+        tile.innerHTML = "<span id='setup-tile-location' class='location'></span>";
+
+        /* tile background */
+            var tile_bg = document.createElement('div');
+            tile_bg.className = 'tile_bg';
+            tile.appendChild(tile_bg);
+
+        /* settings link */
+            tile.innerHTML += "<div id='settings_bt' data-icon='settings' data-l10n-id='settings' class='settings'></div>";
+
+        /* battery level */
+            var battery = navigator.battery;
+            if (battery) {
+                var batterylevel = Math.round(battery.level * 100) + "%";
+                var batterylevel_10 = Math.round(battery.level * 10) + "%";
+                if (batterylevel_10 > 10) batterylevel_10 = 10;
+                tile.innerHTML += "<i data-icon='battery-"+batterylevel_10+"' data-l10n-id='battery-"+batterylevel_10+"' style='display:inline-block;line-height:0.8em;' class='battery'> "
+                                    + batterylevel + "</i>";
+            }
+
+        /* date */
+            tile.innerHTML += "<div id='worded'><span class='weekday'>"+ U.get_worded_day( U.get_numeric_day( C.date )) + "</span>"
+                            + " <span class='monthday'>" + C.date.getDate() + "</span></div>";
+
+        //TODO: refactor all this in aux
+        function successGeoLoc(pos) {
+
+              /**
+               * show here info weather based on geoloc data
+               * http://api.yr.no/weatherapi/locationforecast/1.9/documentation#schema
+               * http://api.yr.no/weatherapi/weathericon/1.1/documentation
+               * -------------------------------------------
+               */
+                var weather_info = U.ajax("http://api.yr.no/weatherapi/locationforecast/1.9/?lat="+ pos.coords.latitude +";lon=" + pos.coords.longitude, "weather");
+                document.getElementById("setup-tile").innerHTML += "<div id='weather-info'></div>";
+
+                // city name
+                U.ajax( 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&sensor=true&key='+ C.gugle_key, "city" );
+        };
+
+        function errorGeoLoc(err) {
+          console.warn('ERROR (' + err.code + '): ' + err.message);
+        };
+
+        navigator.geolocation.getCurrentPosition(successGeoLoc, errorGeoLoc, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+
+
+        C.parent.insertBefore(tile, C.parent.children[1]);
+
+        // /**************
+        // * recursivity *
+        // **************/
+        //
+        // CAUTION: this inhabilites the console in the WebIDE
+        // for debugging this app, please comment out this setTimeout()
+
+        window.setTimeout(function(){
+            build_setup_tile();
+            }, C.TS_UPD_SETUP_TILE);
+     };
+
+    /**
+     * Renders the icon to the container.
+     */
+    var render = icon => {
+
+            // guards
+            if (!icon.manifest.icons) return;
+            if ( R.contains ( icon.manifest.role, C.HIDDEN_ROLES ))  return;
+            //end guards
+
+            if ( U.is_small( i, R, C.smalls ) > -1 ) {
+                var icon_image = navigator.mozApps.mgmt.getIcon(icon, 32);
+            }else{
+                var icon_image = navigator.mozApps.mgmt.getIcon(icon, 60);
+            }
+
+            icon_image.then ( img => {
+
+                var name = icon.manifest.name;
+
+                // end callscreen
+                var wordname = name.split(" ");
+                /* HD2: key by manifest URL — apps with the same first word
+                   (Telegram, Telegram HD2) used to share one tile target */
+                var key = icon.manifestURL || wordname[0];
+                var firstchar = name.charAt(0);
+
+                /* tile generation*/
+                var tile = document.createElement('div');
+                tile.id = 'tile_'+i;
+                tile.className = 'tile';
+
+                    /* tile icon */
+                    var tile_ic = document.createElement('div');
+                    tile_ic.className = 'tile_ic';
+                    tile_ic.style.background = 'transparent url(' + window.URL.createObjectURL( img ) + ') no-repeat';
+
+                    // Callscreen icon [ doing things like this is cheese ]
+                    if (name == "Communications") { //should be Callscreen
+                        tile_ic.style.background = 'transparent url(/img/dialer-icon.png) no-repeat';
+                    }
+
+                    tile_ic.setAttribute('rel', key);
+                    tile_ic.id = key;
+
+                    tile.appendChild(tile_ic);
+
+                    /* tile background */
+                    var tile_bg = document.createElement('div');
+                    tile_bg.className = 'tile_bg';
+                    tile_bg.style.backgroundColor = U.get_color(name);
+
+                    tile.appendChild(tile_bg);
+
+                    /* HD2: localized label (manifest locales, dialer entry point for Communications) */
+                    var loc_name = m => {
+                        var l = (m && m.locales) || {};
+                        var lang = navigator.language || 'ru';
+                        var e = l[lang] || l[lang.split('-')[0]];
+                        return (e && e.name) || (m && m.name) || name;
+                    };
+                    var ep = icon.manifest.entry_points;
+                    var tile_label = document.createElement('div');
+                    tile_label.className = 'tile_label';
+                    tile_label.textContent = (name == "Communications" && ep && ep.dialer) ?
+                        loc_name(ep.dialer) : loc_name(icon.manifest);
+                    tile.appendChild(tile_label);
+
+                document.getElementById('apps').appendChild(tile);
+
+                /* we associate the tile_ic to the firefox OS icon, because the tile_ic is who get the 'click' event, not the tile container */
+                C.iconMap[key] = icon;
+
+                /* end tile generation*/
+
+                // array for storing it in JSON for using records
+                var item = { "label": key, "index": i, "order": 0 };
+                C.storage = localStorage.getItem("storage");
+
+                if ( !C.storage ) {
+                    C.storage = [];
+                    C.storage[i] = item;
+                    localStorage.setItem( "storage", JSON.stringify( C.storage ));
+                } else  {
+                    var data = JSON.parse( C.storage );
+                    data[i] =  item;
+                    localStorage.setItem( "storage", JSON.stringify( data ));
+                }
+
+
+                ++i;
+
+                if ( U.is_small( i, R, C.smalls ) > -1 )  {
+                    tile.classList.add("small");
+                }
+
+
+                // initial dock
+                if (4 == i || 3 == i || 2 == i || 9 == i){
+                    var firsts_dock = tile.cloneNode(true);
+                    firsts_dock.className  = "tile small in-dock";
+                    firsts_dock.children[0].classList.add( "docker" );
+                    document.getElementById("dock").appendChild(firsts_dock);
+                }
+
+                //end initial dock
+
+            });
+
+            if (typeof icon_image == undefined) return;
+    }
+
+    /* fires up the painting */
+    var start = () => {
+
+        i = 0;
+
+        /* https://developer.mozilla.org/en-US/docs/Web/API/Element/classList */
+
+        /* empty #apps and add #dock */
+        C.parent.innerHTML = '';
+            var dock = document.createElement('div');
+            dock.id = 'dock';
+            apps.appendChild(dock);
+
+        /* transparency mode */
+        C.parent.classList.remove('transparent');
+        if ( C.b_transparency == 1 ){
+            apps.classList.add('transparent');
+        }
+
+
+        if ( C.only_big != 1 ) {
+            C.smalls = [ 2, 3 ,4 ,5, 7, 8 ,9 ,10, 15, 16, 17, 18 ];
+        } else {
+            C.smalls = [];
+        }
+
+            /**
+             * Fetch all apps and render them.
+             */
+            var myApps = new Promise((resolve, reject) => {
+                    var request = navigator.mozApps.mgmt.getAll();
+
+                    request.onsuccess = (e) => {
+
+                      build_setup_tile();
+
+                      // hic sunt render leones
+                      R.forEach( render, request.result );
+
+                    };
+
+                    request.onerror = (e) => {
+                      console.error('Error calling getAll: ' + request.error.name);
+                      resolve();
+                    };
+            });
+
+            myApps.then(
+                v => {
+
+                }, v => {
+                    print_msg();
+                }
+            );
+
+
+            U.add_initial_styles();
+
+    } //end start
+
+    window.addEventListener('devicelight', ev => {
+        //console.log(ev.value);
+    });
+
+    /* === show the list with all installed apps for specify a new one for this tile === */
+    window.addEventListener('contextmenu', ev => {
+
+        var tile_ic = ev.originalTarget;
+
+        // settings popup only opens for not docked items
+        if ( R.contains("docker")(tile_ic.classList) == false ) {
+            U.show_tile_settings(tile_ic.parentNode, R, C.HIDDEN_ROLES);
+        }
+    });
+
+    /* === the processement of the click is taken after 500 milliseconds after the click, for give time to CSS transition === */
+    window.addEventListener('click', ev => {
+        setTimeout(function(){
+            event_click(ev);
+        }, 500);}
+
+    );
+
+    var event_click = ev => {
+
+        var this_tile = ev.originalTarget;
+
+        /* if clicked a <li> element at tile_settings (so the originalTarget is not a tile, but a <li> element) */
+        if (this_tile.classList.contains("tile_settings_li")) {
+            return U.set_tile_app(this_tile, C.iconMap);
+        }
+
+        var rel = this_tile.getAttribute('rel');
+
+        if ( typeof C.storage == "string" ) C.storage = JSON.parse( C.storage );
+
+        if ( C.iconMap[rel] ){
+
+            var i = C.iconMap[rel];
+            var found     =  R.filter( R.propEq("label", rel ), C.storage )[0];
+            var index     =  found ? found.index : -1;
+
+            // we add 1 to value of that icon in localStorage ...
+            if (index >= 0) { C.storage[index].order +=1; }
+            localStorage.setItem( "storage", JSON.stringify( C.storage ));
+
+
+            // transpose storage value to DOM elements
+            if (index >= 0) { this_tile.dataset.order = C.storage[index].order; }
+
+
+            // Callscreen, so dirty :S
+            /*
+             * after 1 feb 2016 Callscreen well be decoupled, so this will not be neccessary no more :)
+             *
+             */
+            var entry = null; ;
+            if ( i.manifest.name == "Communications" && i.manifest.entry_points )
+                entry = "dialer";
+            //TODO; handle launch contacts
+
+            i.launch(entry);
+            U.print_dock( R, C.iconMap, document );
+        }
+
+
+        // options
+
+        switch( this_tile.id ) {
+            case "worded":
+            case "settings_bt":
+            case "setup-tile":
+                U.show_options( C.b_transparency, C.only_big );
+                break;
+            case "hide_trans":
+                C.b_transparency = 0;
+                start();
+                break;
+            case "set_trans":
+                C.b_transparency = 1;
+                start();
+                break;
+            case "only_big":
+                C.only_big = 1;
+                start();
+                break;
+            case "show_small":
+                C.only_big = 0;
+                start();
+                break;
+            case 'close_tile_settings':
+                U.close_select_app();
+                break;
+        }
+
+
+        /* if clicked the empty space of the options tile */
+        if (this_tile.classList.contains("options")) {
+            build_setup_tile();
+        }
+
+        // end options
+
+
+        // button close → onclick() is not allowed by CSP FirefoxOS policy
+        if ( this_tile.classList[0] == "x_close_bt") {
+            U.close_select_app();
+        }
+
+    }; //end window event 'click', document.getElementsByClassName('tile'));
+
+
+    var removeSmall = function (el) {
+        el.classList.remove("small");
+    }
+
+    var addSmall = function (el) {
+        el.classList.add("small");
+    }
+
+    // 3, 2, 1 ...
+    start();
+
+});

@@ -1,0 +1,25 @@
+{
+  "name": "YouTube",
+  "description": "Лёгкий клиент YouTube через серверы из списка notPipe",
+  "launch_path": "/index.html",
+  "type": "privileged",
+  "developer": {
+    "name": "HD2",
+    "url": "https://github.com/akprof2000/htc-hd2-firefox-os"
+  },
+  "permissions": {
+    "systemXHR": {
+      "description": "Запросы к серверам Invidious, Piped, yt2009 и к списку notPipe"
+    }
+  },
+  "icons": {
+    "60": "/icon60.png",
+    "128": "/icon128.png"
+  },
+  "orientation": ["portrait-primary", "landscape-primary", "landscape-secondary"],
+  "default_locale": "ru",
+  "locales": {
+    "ru": { "name": "YouTube", "description": "Лёгкий клиент YouTube через серверы из списка notPipe" }
+  },
+  "version": "1.0"
+}
